@@ -1,0 +1,34 @@
+# Скачиваем образом для билда
+FROM khipu/openjdk17-alpine AS builder
+
+# Назначаем рабочую директорию
+WORKDIR /app
+
+# Установливаем зависимости
+RUN apk add --no-cache maven
+
+# Копируем необходимые модули для сборки
+COPY ./public-data /app/public-data
+COPY ./notification-service /app/notification-service
+
+# Устанавливаем необходимые модули
+WORKDIR /app/public-data
+RUN mvn clean install
+
+# Компилируем серв
+# -Dmaven.test.skip - отключает запуск тестов при компиляции
+WORKDIR /app/notification-service
+RUN mvn clean package -Dmaven.test.skip
+
+# Используем другой базовый образ, содержащий только JRE
+FROM openjdk:17-jdk-alpine
+
+# Установливаем рабочую директорию внутри контейнера
+WORKDIR /app
+
+# Копируем JAR-файл из предыдущего этапа внутрь контейнера
+COPY --from=builder /app/notification-service/main/target/notifications.jar .
+
+# Запускаем приложение при старте контейнера
+# Опции "--add-opens", "java.base/java.lang=ALL-UNNAMED" - особенность для запуска сервиса уведомлений
+CMD ["java", "--add-opens", "java.base/java.lang=ALL-UNNAMED", "-jar", "/app/notifications.jar"]

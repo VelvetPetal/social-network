@@ -54,14 +54,8 @@
             <version>2.14.2</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>ru.itgroup.intouch</groupId>
-            <artifactId>ru.itgroup.intouch.public-data</artifactId>
-            <version>0.1.5</version>
-            <scope>compile</scope>
-        </dependency>
-
     </dependencies>
+
     <build>
         <pluginManagement>
             <plugins>
@@ -78,11 +72,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
                 <configuration>
-
                     <source>17</source>
                     <target>17</target>
-
-
                 </configuration>
             </plugin>
         </plugins>

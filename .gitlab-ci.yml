@@ -1,22 +1,17 @@
 stages:
   - build
-  - test
   - deploy
 
 variables:
   HELLO_STRING: 'Hello CI/CD!'
 
-build-job:
+merge_notifications:
   stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME =~ /^notification/
   script:
-    - echo ${HELLO_STRING}
-
-unit-test-job:
-  stage: test
-  script:
-    - echo "Running unit tests... This will take about 5 seconds."
-    - sleep 5
-    - echo "Code coverage is 666%"
+    - cd /root/social-network/back
+    - git pull
 
 deploy-job:
   stage: deploy

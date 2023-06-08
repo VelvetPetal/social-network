@@ -1,3 +1,36 @@
+# Сборка образов для Docker
+
+1. Создаем в корне проекта необходимый Dockerfile для вашего сервиса. Создавать нужно именно в корне, чтобы у докера был
+   контекст всего приложения, а не только вашего сервиса. Имя файла должно быть Dockerfile-servName.
+2. В Dockerfile прописываем шаги для сборки образа вашего сервиса. Должно быть 2 контейнера:
+    1. Установка зависимостей для компиляции проекта и сама компиляция.
+    2. Образ для запуска, который желательно делать без jdk, только jre.
+3. Добавляем мавен плагин, чтобы задать желаемое имя джарника
+   ```xml
+   <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-jar-plugin</artifactId>
+       <version>3.2.0</version>
+       <configuration>
+           <finalName>jarName</finalName>
+       </configuration>
+   </plugin>
+   ```
+4. Компилируем командой
+
+```shell
+docker buildx build --build-arg SN_DB_HOST=${CONTAINER_IP} --build-arg SN_DB_PORT=${PORT} --build-arg SN_DB_NAME=${DB_NAME} --build-arg SN_DB_USER=${USER} --build-arg SN_DB_PASSWORD=${PASSWORD} --platform linux/amd64 -f Dockerfile-servName --tag intouchgroup/imageName:latest . --load 2>&1 | tee build.log
+```
+
+где
+
+- `-f Dockerfile-notifications` - аргумент, указывающий Dockerfile вашего сервиса
+- `imageName` - желаемое имя образа
+- `2>&1 | tee build.log` вывод логов в файл, чтобы можно было разобраться в случае чего в чем проблема с созданием
+  образа.  
+  **Аргументы из команды вам скорее всего не понадобятся. Они нужны только если во время сборки вам обязательно
+  подключение к БД.**
+
 # Запуск проекта
 
 Проект запускается при помощи `docker compose`.
