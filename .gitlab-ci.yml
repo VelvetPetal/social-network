@@ -1,20 +1,100 @@
 stages:
   - build
-  - deploy
 
 variables:
-  HELLO_STRING: 'Hello CI/CD!'
+  GITLAB_ALLOW_PRIVILEGED: 'true'
 
 merge_notifications:
   stage: build
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME =~ /^notification/
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME =~ /^pipelines/
   script:
     - cd /root/social-network/back
     - git pull
 
-deploy-job:
-  stage: deploy
+    - docker exec social-network-pgsql-1 pg_dump -s -h localhost -p 5432 -U user social_network > /root/social-network/dump.sql
+
+    # Очистка вероятного мусора от неудачных пайплайнов
+    - docker stop build_db || true
+    - docker rm build_db || true
+    - docker stop builder || true
+    - docker rm builder || true
+    - docker rmi notifications-builder || true
+    - docker network rm build || true
+
+    # Создает сеть, запускает БД, разворачивает дамп
+    - if ! docker network inspect build >/dev/null 2>&1; then docker network create build; fi
+    - docker run -d -p 5433:5432 --network build --name build_db -e POSTGRES_PASSWORD=build_pass -e POSTGRES_DB=build_db -e POSTGRES_USER=builder postgres:14
+    - sleep 5
+    - docker exec -i build_db psql -U builder -h localhost build_db < /root/social-network/dump.sql
+
+    # Создает образ для сборки
+    - docker buildx build --platform linux/amd64 -f Dockerfile-notifications-builder --tag notifications-builder:latest . --load 2>&1 | tee build-notifications.log
+    # Запускает контейнер
+    - docker run -d -p 999:999 --network build --name builder -e SN_DB_PASSWORD=build_pass -e SN_DB_NAME=build_db -e SN_DB_USER=builder -e SN_DB_HOST=build_db -e SN_DB_PORT=5432 notifications-builder
+    # Компиляция
+    - docker exec -i builder mvn clean package -Dmaven.test.skip
+
+    - docker cp builder:/app/notification-service/main/target/notifications.jar /root/social-network/back
+    - docker buildx build --platform linux/amd64 -f Dockerfile-notifications --tag intouchgroup/notifications-new:latest . --load 2>&1 | tee build-notifications.log
+
+    # Очистка мусора
+    - docker stop build_db || true
+    - docker rm build_db || true
+    - docker stop builder || true
+    - docker rm builder || true
+    - docker rmi notifications-builder || true
+    - docker network rm build || true
+    - rm /root/social-network/dump.sql
+    - rm /root/social-network/back/notifications.jar
+
+    # Перезапуск контейнера, удаление старого образа
+    - cd /root/social-network
+    - docker stop social-network-notifications-1
+    - docker rm social-network-notifications-1
+    - docker rmi intouchgroup/notification-serv
+    - docker tag intouchgroup/notifications-new:latest intouchgroup/notification-serv:latest
+    - docker rmi intouchgroup/notifications-new:latest
+    - docker compose up -d --build
+
+merge_aggregator:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME =~ /^aggregator/
   script:
-    - echo "Deploying application..."
-    - echo "Server in fire! Your commit has broken prod..."
+    - echo "Aggregator pipeline"
+
+merge_friend:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME =~ /^friend/
+  script:
+    - echo "Friend pipeline"
+
+merge_account:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME =~ /^account/
+  script:
+    - echo "Account pipeline"
+
+merge_message:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME =~ /^message/
+  script:
+    - echo "Message pipeline"
+
+merge_post:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME =~ /^post/
+  script:
+    - echo "Post pipeline"
+
+merge_storage:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME =~ /^storage/
+  script:
+    - echo "Storage pipeline"

@@ -5,21 +5,17 @@
 2. В Dockerfile прописываем шаги для сборки образа вашего сервиса. Должно быть 2 контейнера:
     1. Установка зависимостей для компиляции проекта и сама компиляция.
     2. Образ для запуска, который желательно делать без jdk, только jre.
-3. Добавляем мавен плагин, чтобы задать желаемое имя джарника
+3. Чтобы задать желаемое имя джарника, в секцию `build` добавляем следующее
    ```xml
-   <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-jar-plugin</artifactId>
-       <version>3.2.0</version>
-       <configuration>
-           <finalName>jarName</finalName>
-       </configuration>
-   </plugin>
+    <build>
+        <finalName>notifications</finalName>
+        ...
+    </build>
    ```
 4. Компилируем командой
 
 ```shell
-docker buildx build --build-arg SN_DB_HOST=${CONTAINER_IP} --build-arg SN_DB_PORT=${PORT} --build-arg SN_DB_NAME=${DB_NAME} --build-arg SN_DB_USER=${USER} --build-arg SN_DB_PASSWORD=${PASSWORD} --platform linux/amd64 -f Dockerfile-servName --tag intouchgroup/imageName:latest . --load 2>&1 | tee build.log
+docker buildx build --platform linux/amd64 -f Dockerfile-servName --tag intouchgroup/imageName:latest . --load 2>&1 | tee build.log
 ```
 
 где

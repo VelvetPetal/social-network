@@ -1,0 +1,19 @@
+# Скачиваем образом для билда
+FROM khipu/openjdk17-alpine AS builder
+
+# Назначаем рабочую директорию
+WORKDIR /app
+
+# Установливаем зависимости
+RUN apk add --no-cache maven
+
+# Копируем необходимые модули для сборки
+COPY ./public-data /app/public-data
+COPY ./notification-service /app/notification-service
+
+# Устанавливаем необходимые модули
+WORKDIR /app/public-data
+RUN mvn clean install
+
+WORKDIR /app/notification-service
+CMD ["sh", "-c", "while true; do sleep 1; done"]

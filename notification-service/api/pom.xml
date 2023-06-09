@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.googlecode.jmapper-framework</groupId>
             <artifactId>jmapper-core</artifactId>
-            <version>1.6.1.CR2</version>
+            <version>${jmap.version}</version>
         </dependency>
 
         <dependency>

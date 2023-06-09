@@ -30,6 +30,12 @@
         <jooq.version>3.18.4</jooq.version>
         <liquibase.version>4.22.0</liquibase.version>
         <jackson.version>2.15.1</jackson.version>
+        <lombok.version>1.18.26</lombok.version>
+        <postgresql.version>42.6.0</postgresql.version>
+        <jmap.version>1.6.1.CR2</jmap.version>
+        <jetbrains.annotations.version>24.0.1</jetbrains.annotations.version>
+
+        <compile.plugin.version>3.10.1</compile.plugin.version>
     </properties>
 
     <modules>
@@ -75,18 +81,19 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
+            <version>${lombok.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>24.0.1</version>
+            <version>${jetbrains.annotations.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
 
     <build>
+        <finalName>notifications</finalName>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -105,15 +112,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.0</version>
-                    <configuration>
-                        <finalName>notifications</finalName>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

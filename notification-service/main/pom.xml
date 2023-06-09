@@ -106,7 +106,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>${compile.plugin.version}</version>
                 <configuration>
                     <compilerArgs>
                         <arg>--add-opens</arg>
