@@ -28,4 +28,10 @@ public interface AuthServiceClient {
 
     @GetMapping("/captcha")
     CaptchaDto captcha();
+
+    @PostMapping("/change-email-link")
+    void changeEmail(@RequestBody EmailDto emailDto);
+
+    @PostMapping("/change-password-link")
+    void changePassword(@RequestBody EmailDto emailDto);
 }

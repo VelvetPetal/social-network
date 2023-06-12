@@ -1,8 +1,8 @@
 package ru.itgroup.intouch.service.search;
 
+import dto.AccountSearchDto;
 import dto.AccountSearchDtoPageable;
 import filters.AccountFilterBuilder;
-import dto.AccountSearchDto;
 import lombok.RequiredArgsConstructor;
 import mappers.AccountDtoPageableMapper;
 import model.account.Account;

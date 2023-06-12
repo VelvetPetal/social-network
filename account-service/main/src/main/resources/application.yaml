@@ -23,8 +23,16 @@ spring:
     change-log: classpath:/dbchangelog-master.xml
 
 email:
-  subject: Восстановление пароля
-  message: "Чтобы восстановить пароль, перейдите по ссылке: http://${SN_ACCOUNT_HOST}/change-password/"
+  passwordRecovery:
+    subject: восстановление пароля
+    url: "http://${SN_ACCOUNT_HOST}/change-password/"
+  passwordChange:
+    subject: изменение пароля
+    url: "http://${SN_ACCOUNT_HOST}/shift-password"
+  emailChange:
+    subject: изменение почтового адреса
+    url: "http://${SN_ACCOUNT_HOST}/shift-email"
+
 
 delete-hash:
   delay-ms: 60000

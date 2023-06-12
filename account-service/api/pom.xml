@@ -24,10 +24,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-starter-security</artifactId>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>ru.itgroup.intouch</groupId>
             <artifactId>ru.itgroup.intouch.search-engine</artifactId>
@@ -61,6 +57,10 @@
             <artifactId>ru.itgroup.intouch.public-data</artifactId>
             <version>0.1.5</version>
 
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
 

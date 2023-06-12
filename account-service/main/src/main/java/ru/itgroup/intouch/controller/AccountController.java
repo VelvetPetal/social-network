@@ -1,9 +1,9 @@
 package ru.itgroup.intouch.controller;
 
 import dto.AccountSearchDtoPageable;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.account.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,7 +44,7 @@ public class AccountController {
     }
 
     @PutMapping("/me")
-    public AccountDto changeProfileInfo(@RequestBody AccountDto accountDto) {
+    public AccountDto changeProfileInfo(@Valid @RequestBody AccountDto accountDto) {
         accountService.updateAccountData(accountDto);
         return accountDto;
     }
