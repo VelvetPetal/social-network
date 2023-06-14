@@ -7,7 +7,7 @@ variables:
 merge_notifications:
   stage: build
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME =~ /^pipelines/
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME =~ /^notification/
   script:
     - cd /root/social-network/back
     - git pull
@@ -62,7 +62,58 @@ merge_aggregator:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_COMMIT_REF_NAME =~ /^aggregator/
   script:
-    - echo "Aggregator pipeline"
+    - cd /root/social-network/back
+    - git pull
+
+    - docker exec social-network-pgsql-1 pg_dump -s -h localhost -p 5432 -U user social_network > /root/social-network/dump.sql
+    - cd /root/social-network
+    - docker compose down
+    - cd /root/social-network/back
+
+    # Очистка вероятного мусора от неудачных пайплайнов
+    - docker stop build_db || true
+    - docker rm build_db || true
+    - docker stop builder || true
+    - docker rm builder || true
+    - docker rmi aggregator-builder || true
+    - docker network rm build || true
+
+    # Создает сеть, запускает БД, разворачивает дамп
+    - if ! docker network inspect build >/dev/null 2>&1; then docker network create build; fi
+    - docker run -d -p 5433:5432 --network build --name build_db -e POSTGRES_PASSWORD=build_pass -e POSTGRES_DB=build_db -e POSTGRES_USER=builder postgres:14
+    - sleep 5
+    - docker exec -i build_db psql -U builder -h localhost build_db < /root/social-network/dump.sql
+
+    # Создает образ для сборки
+    - docker buildx build --platform linux/amd64 -f Dockerfile-aggregator-builder --tag aggregator-builder:latest . --load 2>&1 | tee build-aggregator.log
+    # Запускает контейнер
+    - docker run -d -p 999:999 --network build --name builder -e SN_DB_PASSWORD=build_pass -e SN_DB_NAME=build_db -e SN_DB_USER=builder -e SN_DB_HOST=build_db -e SN_DB_PORT=5432 aggregator-builder
+    # Установка серва уведомлений
+    - docker exec -i builder mvn clean install -Dmaven.test.skip -f /app/notification-service/pom.xml
+    # Компиляция
+    - docker exec -i builder mvn clean package
+
+    - docker cp builder:/app/aggregator/target/aggregator.jar /root/social-network/back
+    - docker buildx build --platform linux/amd64 -f Dockerfile-aggregator --tag intouchgroup/aggregator-new:latest . --load 2>&1 | tee build-aggregator.log
+
+    # Очистка мусора
+    - docker stop build_db || true
+    - docker rm build_db || true
+    - docker stop builder || true
+    - docker rm builder || true
+    - docker rmi aggregator-builder || true
+    - docker network rm build || true
+    - rm /root/social-network/dump.sql
+    - rm /root/social-network/back/aggregator.jar
+
+    # Перезапуск контейнера, удаление старого образа
+    - cd /root/social-network
+    - docker stop social-network-aggregator-1 || true
+    - docker rm social-network-aggregator-1 || true
+    - docker rmi intouchgroup/aggregator || true
+    - docker tag intouchgroup/aggregator-new:latest intouchgroup/aggregator:latest
+    - docker rmi intouchgroup/aggregator-new:latest
+    - docker compose up -d --build
 
 merge_friend:
   stage: build

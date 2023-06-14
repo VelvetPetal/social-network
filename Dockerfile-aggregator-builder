@@ -1,0 +1,36 @@
+# Скачиваем образом для билда
+FROM khipu/openjdk17-alpine AS builder
+
+# Назначаем рабочую директорию
+WORKDIR /app
+
+# Установливаем зависимости
+RUN apk add --no-cache maven
+
+# Копируем необходимые модули для сборки
+COPY . /app
+
+# Устанавливаем необходимые модули
+WORKDIR /app/public-data
+RUN mvn clean install
+
+WORKDIR /app/search-engine
+RUN mvn clean install
+
+WORKDIR /app/storage-service
+RUN mvn clean install
+
+WORKDIR /app/account-service
+RUN mvn clean install
+
+WORKDIR /app/microservice-friends
+RUN mvn clean install
+
+WORKDIR /app/post-microservice
+RUN mvn clean install -Dmaven.test.skip
+
+WORKDIR /app/message-service
+RUN mvn clean install
+
+WORKDIR /app/aggregator
+CMD ["sh", "-c", "while true; do sleep 1; done"]
