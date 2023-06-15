@@ -104,6 +104,7 @@
     </dependencies>
 
     <build>
+        <finalName>account</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
