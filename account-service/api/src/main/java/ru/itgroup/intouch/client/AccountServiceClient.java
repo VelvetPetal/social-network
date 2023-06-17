@@ -33,8 +33,8 @@ public interface AccountServiceClient {
     @DeleteMapping("/me")
     void deleteAccount(@RequestParam("email") String email);
 
-    @GetMapping("/search")
-    Page<AccountDto> search(AccountSearchDtoPageable dto);
+    @PostMapping("/search")
+    Page<AccountDto> search(@RequestBody AccountSearchDtoPageable dto);
 
     @PostMapping("/accounts")
     List<AccountDto> accounts(@RequestBody List<Long> userIds);

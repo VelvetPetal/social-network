@@ -53,8 +53,8 @@ public class AccountController {
         accountService.setAccountDeleted(email);
     }
 
-    @GetMapping("/search")
-    public Page<AccountDto> search(AccountSearchDtoPageable dto) {
+    @PostMapping("/search")
+    public Page<AccountDto> search(@RequestBody AccountSearchDtoPageable dto) {
         return accountSearchService.getAccountResponse(dto);
 
     }
