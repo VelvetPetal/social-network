@@ -1,6 +1,7 @@
 package ru.itgroup.intouch.service.account;
 
 import com.github.cage.GCage;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import model.account.Account;
 import model.account.User;
@@ -13,6 +14,7 @@ import ru.itgroup.intouch.dto.ImageDTO;
 import ru.itgroup.intouch.dto.RegistrationDto;
 import ru.itgroup.intouch.dto.UploadPhotoDto;
 import ru.itgroup.intouch.exceptions.CaptchaNotValidException;
+import ru.itgroup.intouch.exceptions.ServiceUnavailableException;
 import ru.itgroup.intouch.exceptions.UserAlreadyRegisteredException;
 import ru.itgroup.intouch.mapper.UserMapper;
 import ru.itgroup.intouch.repository.UserRepository;
@@ -30,7 +32,7 @@ public class RegistrationService {
 
     public void registerNewUser(RegistrationDto registrationDto) {
         if (!Objects.equals(registrationDto.getCaptchaCode(), registrationDto.getCaptchaSecret())) {
-            throw new CaptchaNotValidException("Каптча введена неверно.");
+            throw new CaptchaNotValidException("Капча введена неверно.");
         }
         Optional<User> firstByEmail = userRepository
                 .findFirstByEmailEqualsAndIsDeletedEquals(registrationDto.getEmail(), false);
@@ -52,8 +54,13 @@ public class RegistrationService {
         byte[] image = gCage.draw(token);
         MultipartFile multipartImage = new MockMultipartFile(token, image);
         UploadPhotoDto uploadPhotoDto = new UploadPhotoDto();
+        ImageDTO imageDTO;
         uploadPhotoDto.setMultipartFile(multipartImage);
-        ImageDTO imageDTO = storageServiceClient.feignUploadPhoto(uploadPhotoDto);
+        try {
+            imageDTO = storageServiceClient.feignUploadPhoto(uploadPhotoDto);
+        } catch (FeignException e){
+            throw new ServiceUnavailableException("Не удалось получить капчу");
+        }
 
         return new CaptchaDto(token, imageDTO.getPhotoPath());
     }

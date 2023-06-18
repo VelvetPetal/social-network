@@ -40,8 +40,7 @@ public class CredentialsRenewalService {
     public void setNewPassword(String linkId, String password) {
         Optional<User> firstByEmail = userRepository.findFirstByHash(linkId);
         if (firstByEmail.isEmpty()) {
-            throw new NoUserRegisteredException("Unable to change password. User with hash \"" +
-                    linkId + "\" not found");
+            throw new NoUserRegisteredException("Не удалось изменить пароль. Запрос на изменение пароля не найден");
         }
         firstByEmail.get().setPassword(password);
         userRepository.save(firstByEmail.get());

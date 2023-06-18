@@ -12,6 +12,7 @@ import ru.itgroup.intouch.client.exceptionHandling.ErrorResponse;
 import ru.itgroup.intouch.exceptions.CaptchaNotValidException;
 import ru.itgroup.intouch.exceptions.NoEmailFoundException;
 import ru.itgroup.intouch.exceptions.NoUserRegisteredException;
+import ru.itgroup.intouch.exceptions.ServiceUnavailableException;
 import ru.itgroup.intouch.exceptions.UserAlreadyRegisteredException;
 
 @RestControllerAdvice
@@ -27,12 +28,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBadRequest(Exception exception,
                                                           WebRequest request) {
         log.error(exception.getMessage());
-        return new ResponseEntity<>(new ErrorResponse(
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.name(),
                 "<br/>" + exception.getMessage(),
-                request.getDescription(false)),
-                HttpStatus.BAD_REQUEST);
+                request.getDescription(false)));
     }
-
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleConnectException(ServiceUnavailableException e,
+                                                                WebRequest request){
+        log.error(e.getLocalizedMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                HttpStatus.INTERNAL_SERVER_ERROR.name(),
+                e.getLocalizedMessage(),
+                request.getDescription(false)));
+    }
 }

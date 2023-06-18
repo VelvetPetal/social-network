@@ -29,15 +29,14 @@ public class AccountService {
                 .findFirstByEmailEqualsAndIsDeletedEquals(email, false);
         if (account.isEmpty()) {
             throw new NoUserRegisteredException("Аккаунт с адресом \"" +
-                    email + "\" не найден.");
+                    email + "\" не найден");
         }
         return userMapper.accountEntityToAccountDto(account.get());
     }
 
     public UserDto getUserInfo(String email) {
         if (!userRepository.existsByEmail(email)) {
-            throw new NoUserRegisteredException("Пользователь с адресом \"" +
-                    email + "\" не зарегистрирован.");
+            throw new NoUserRegisteredException("Неверный логин или пароль");
         }
         Optional<User> user = userRepository
                 .findFirstByEmailEqualsAndIsDeletedEquals(email, false);
@@ -45,7 +44,7 @@ public class AccountService {
             return userMapper.userEntity2UserDto(user.get());
         }
         throw new NoUserRegisteredException("Пользователь с адресом \"" +
-                email + "\" удалил свой аккаунт.");
+                email + "\" удалил свой аккаунт");
     }
 
     public void updateAccountData(AccountDto accountDto) {
@@ -54,7 +53,7 @@ public class AccountService {
         log.info("change account with email \"" + accountDto.getEmail() + "\"");
         if (account.isEmpty()) {
             throw new NoUserRegisteredException("Невозможно изменить данные аккаунта. E-mail \"" +
-                    accountDto.getEmail() + "\" не найден.");
+                    accountDto.getEmail() + "\" не найден");
         }
         userMapper.updateAccountFromDto(accountDto, account.get());
         accountRepository.save(account.get());
