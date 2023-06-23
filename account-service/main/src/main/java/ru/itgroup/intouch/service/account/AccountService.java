@@ -12,6 +12,7 @@ import ru.itgroup.intouch.mapper.UserMapper;
 import ru.itgroup.intouch.repository.AccountRepository;
 import ru.itgroup.intouch.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,8 +56,10 @@ public class AccountService {
             throw new NoUserRegisteredException("Невозможно изменить данные аккаунта. E-mail \"" +
                     accountDto.getEmail() + "\" не найден");
         }
-        userMapper.updateAccountFromDto(accountDto, account.get());
-        accountRepository.save(account.get());
+        Account accountEntity = account.get();
+        userMapper.updateAccountFromDto(accountDto, accountEntity);
+        accountEntity.setUpdateOn(LocalDateTime.now());
+        accountRepository.save(accountEntity);
     }
 
     public void setAccountDeleted(String email) {
