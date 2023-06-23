@@ -2,7 +2,6 @@ package ru.itgroup.intouch.client;
 
 import dto.AccountSearchDtoPageable;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,7 +37,7 @@ public interface AccountServiceClient {
     void deleteAccount(@RequestParam("email") String email);
 
     @PostMapping("/search")
-    Page<AccountDto> search(@SpringQueryMap AccountSearchDtoPageable dto);
+    Page<AccountDto> search(@RequestBody AccountSearchDtoPageable dto);
 
     @PostMapping("/accounts")
     List<AccountDto> accounts(@RequestBody List<Long> userIds);
